@@ -80,4 +80,4 @@ The library used for image processing is [SixLabors ImageSharp](https://github.c
 
 ## License
 
-This project is licensed under the GPLv3.0. See the [LICENSE](./documents/LICENSE.MD) file for details.
+This project is licensed under the GPLv3.0. See the [LICENSE](./documents/LICENSE.md) file for details.
