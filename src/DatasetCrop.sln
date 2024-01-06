@@ -7,8 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DatasetCrop", "DatasetCrop\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{911E09DB-B0EA-499E-A52E-6FFD53C4E255}"
 	ProjectSection(SolutionItems) = preProject
-		..\documents\LICENSE.MD = ..\documents\LICENSE.MD
-		..\README.MD = ..\README.MD
+		..\documents\LICENSE.md = ..\documents\LICENSE.md
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Global
