@@ -5,14 +5,6 @@
         mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="450" MinWidth="1325" MinHeight="500"
         x:Class="DatasetCrop.MainWindow"
         Title="Dataset Crop" KeyDown="Window_KeyDown" KeyUp="Window_KeyUp" WindowStartupLocation="CenterScreen" WindowState="Maximized" Icon="/Assets/crop.png">
-  <Interaction.Behaviors>
-    <EventTriggerBehavior EventName="Opened">
-      <InvokeCommandAction Command="{Binding ViewOpened_Command}" />
-    </EventTriggerBehavior>
-    <EventTriggerBehavior EventName="KeyUp">
-      <InvokeCommandAction Command="{Binding ViewOpened_Command}" />
-    </EventTriggerBehavior>
-  </Interaction.Behaviors>
   <Grid>
     <Label Content="Input path:" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="6,15,0,0" Width="100" Height="23"/>
     <TextBox Text="{Binding InputPath}" Margin="90,10,175,0" Height="23" VerticalAlignment="Top" HorizontalContentAlignment="Left" FontSize="14"/>
@@ -35,8 +27,7 @@
     <TextBox Text="{Binding PreviewHeight}" Margin="1033,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
     
     <CheckBox Content="Use original scale sizes" IsChecked="{Binding UsesOriginalScaleSizes}" FontFamily="Arial" Height="32" Width="180" Padding="0" FontSize="14" Margin="1140,50,6,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-    <!--<Button Content="Set" Command="{Binding RefreshInputAsync_Command}" FontFamily="Arial" Height="32" Width="50" Padding="0" FontSize="14" Margin="1140,50,6,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>-->
-
+  
     <ScrollViewer Background="LightBlue" Margin="6,90,6,50" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
       <Grid x:Name="grdImages">
         
