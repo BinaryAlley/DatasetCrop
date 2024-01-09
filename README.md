@@ -15,7 +15,7 @@ Dataset Crop simplifies the crucial step of preparing image datasets for machine
 
 ## Running the Application
 
-Dataset Crop was built using [Avalonia UI](https://avaloniaui.net/), so it is cross-platform and can be ran on Linux, Windows, macOS. The process varies slightly depending on the operating system.
+Dataset Crop was built using [Avalonia UI](https://avaloniaui.net/), so it is cross-platform and can be run on Linux, Windows, macOS. The process varies slightly depending on the operating system.
 
 ### Linux, macOS
 
@@ -40,7 +40,7 @@ Dataset Crop was built using [Avalonia UI](https://avaloniaui.net/), so it is cr
 ## Usage
 
 1. Launch the application.
-2. For the **Input Path** field, browse and select the directory containing your image dataset, or manually paste the path in the text box.
+2. For the **Input Path** field, browse and select the directory containing your images dataset, or manually paste the path in the text box.
 3. Set the desired crop parameters:
    - **Use original scale sizes**: whether to use the original images sizes or the preview panel sizes to express the cropping parameters. 
    If this is checked, a value of 100 for **Crop Width** would literally mean 100 pixels of the original image. If it's unchecked, 
