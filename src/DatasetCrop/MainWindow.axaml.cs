@@ -6,6 +6,7 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using DatasetCrop.MVVM;
 using MessageBox.Avalonia;
 using MessageBox.Avalonia.Enums;
@@ -134,7 +135,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         var result = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions() { AllowMultiple = false, Title = "Choose dataset images directory" });
         if (result.Count > 0 && result[0].TryGetUri(out Uri? directory))
-            InputPath = directory.AbsolutePath;
+            InputPath = directory.LocalPath;
     }
 
     /// <summary>
@@ -144,7 +145,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         var result = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions() { AllowMultiple = false, Title = "Choose cropped images directory" });
         if (result.Count > 0 && result[0].TryGetUri(out Uri? directory))
-            OutputPath = directory.AbsolutePath;
+            OutputPath = directory.LocalPath;
     }
 
     /// <summary>
@@ -162,78 +163,113 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         int column = 0;
         int row = 0;
         int margin = 5;
-        // iterate all files in the input directory
-        foreach (string file in Directory.GetFiles(InputPath!))
-        {
-            string ext = Path.GetExtension(file).ToLower();
-            if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".bmp") // only process images
+        await Task.Run(async () => 
+        { 
+            // iterate all files in the input directory
+            var filePaths = Directory.GetFiles(InputPath!, "*.jpg")
+                                     .Concat(Directory.GetFiles(InputPath!, "*.jpeg"))
+                                     .Concat(Directory.GetFiles(InputPath!, "*.png"))
+                                     .Concat(Directory.GetFiles(InputPath!, "*.bmp"));
+            var loadTasks = filePaths.Select(async file =>
             {
-                // for each image file, create a grid that contains an image and a drag panel, and add it to the previews list
-                Grid container = new();
-                container.Width = previewWidth;
-                container.Height = previewHeight;
-                container.Margin = new Thickness(column * (previewWidth + margin), row * (previewWidth + margin), 0, 0);
-                container.HorizontalAlignment = HorizontalAlignment.Left;
-                container.VerticalAlignment = VerticalAlignment.Top;
-                container.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(0, 0, 0), 0.1);
-                
-                var bitmap = new Bitmap(file);
-                // for each image, ensure the drag panel is not in any way bigger than the visible area of the scaled down image preview
-                if (!ValidateCropPanelSize(bitmap.Size.Width, bitmap.Size.Height, cropWidth, cropHeight, previewWidth, previewHeight))
+                using (var tempImage = await SixLabors.ImageSharp.Image.LoadAsync(file))
                 {
-                    await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Specified crop size exceeds the bounds of the scaled image!" + Environment.NewLine + file, ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
-                    ClearImagePreviews();
-                    return;
+                    var originalSize = new Avalonia.Size(tempImage.Width, tempImage.Height);
+                    var resizedImage = await LoadResizedImageAsync(tempImage, previewWidth, previewHeight);
+                    return new { FilePath = file, Image = resizedImage, OriginalSize = originalSize };
                 }
-                Avalonia.Controls.Image image = new();
-                image.Source = bitmap;
-                image.Width = previewWidth;
-                image.Height = previewHeight;
-                image.Margin = new Thickness(0);
-                image.HorizontalAlignment = HorizontalAlignment.Left;
-                image.VerticalAlignment = VerticalAlignment.Top;
-                image.Tag = file; // store the path of the original image file
-                ToolTip.SetTip(image, file);
-                container.Children.Add(image);
+            });
 
-                Panel dragPanel = new();
-                if (usesOriginalScaleSizes)
+            var loadedImages = await Task.WhenAll(loadTasks);
+            foreach (var loadedImage in loadedImages)
+            {
+                await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-                    // calculate the uniform scaling factor based on the largest dimension
-                    double scaleFactor = Math.Max(bitmap.Size.Width / previewWidth, bitmap.Size.Height / previewHeight);
-                    // scale down the crop size and position uniformly
-                    dragPanel.Width = cropWidth / scaleFactor;
-                    dragPanel.Height = cropHeight / scaleFactor;
-                    dragPanel.Margin = new Thickness(cropX / scaleFactor, cropY / scaleFactor, 0, 0);
-                }
-                else
-                {
-                    dragPanel.Width = cropWidth;
-                    dragPanel.Height = cropHeight;
-                    dragPanel.Margin = new Thickness(cropX, cropY, 0, 0);
-                }
-                dragPanel.HorizontalAlignment = HorizontalAlignment.Left;
-                dragPanel.VerticalAlignment = VerticalAlignment.Top;
-                dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 255, 255), 0.3);
-                dragPanel.Cursor = new Cursor(StandardCursorType.SizeAll);
-                dragPanel.PointerMoved += DragPanel_PointerMoved; // subscribe the event handlers used for dragging
-                dragPanel.PointerPressed += DragPanel_PointerPressed;
-                dragPanel.PointerReleased += DragPanel_PointerReleased;
-                dragPanel.Tag = true; // true = "selected" (will be cropped), false = "deselected" (will be ignored when cropping)
+                    // for each image file, create a grid that contains an image and a drag panel, and add it to the previews list
+                    Grid container = new();
+                    container.Width = previewWidth;
+                    container.Height = previewHeight;
+                    container.Margin = new Thickness(column * (previewWidth + margin), row * (previewHeight + margin), 0, 0);
+                    container.HorizontalAlignment = HorizontalAlignment.Left;
+                    container.VerticalAlignment = VerticalAlignment.Top;
+                    container.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(0, 0, 0), 0.1);
+                    // for each image, ensure the drag panel is not in any way bigger than the visible area of the scaled down image preview
+                    if (!ValidateCropPanelSize(loadedImage.OriginalSize.Width, loadedImage.OriginalSize.Height, cropWidth, cropHeight, previewWidth, previewHeight))
+                    {
+                        await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Specified crop size exceeds the bounds of the scaled image!" + Environment.NewLine + loadedImage.FilePath, ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
+                        ClearImagePreviews();
+                        return;
+                    }
+                    Avalonia.Controls.Image image = new();
+                    //image.Source = bitmap;
+                    image.Width = previewWidth;
+                    image.Height = previewHeight;
+                    image.Source = loadedImage.Image;
+                    image.Margin = new Thickness(0);
+                    image.HorizontalAlignment = HorizontalAlignment.Left;
+                    image.VerticalAlignment = VerticalAlignment.Top;
+                    image.Tag = loadedImage.FilePath; // store the path of the original image file
+                    ToolTip.SetTip(image, loadedImage.FilePath);
+                    container.Children.Add(image);
 
-                container.Children.Add(dragPanel);                
-                grdImages.Children.Add(container);
+                    Panel dragPanel = new();
+                    if (usesOriginalScaleSizes)
+                    {
+                        // calculate the uniform scaling factor based on the largest dimension
+                        double scaleFactor = Math.Max(loadedImage.OriginalSize.Width / previewWidth, loadedImage.OriginalSize.Height / previewHeight);
+                        // scale down the crop size and position uniformly
+                        dragPanel.Width = cropWidth / scaleFactor;
+                        dragPanel.Height = cropHeight / scaleFactor;
+                        dragPanel.Margin = new Thickness(cropX / scaleFactor, cropY / scaleFactor, 0, 0);
+                    }
+                    else
+                    {
+                        dragPanel.Width = cropWidth;
+                        dragPanel.Height = cropHeight;
+                        dragPanel.Margin = new Thickness(cropX, cropY, 0, 0);
+                    }
+                    dragPanel.HorizontalAlignment = HorizontalAlignment.Left;
+                    dragPanel.VerticalAlignment = VerticalAlignment.Top;
+                    dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 255, 255), 0.3);
+                    dragPanel.Cursor = new Cursor(StandardCursorType.SizeAll);
+                    dragPanel.PointerMoved += DragPanel_PointerMoved; // subscribe the event handlers used for dragging
+                    dragPanel.PointerPressed += DragPanel_PointerPressed;
+                    dragPanel.PointerReleased += DragPanel_PointerReleased;
+                    dragPanel.Tag = true; // true = "selected" (will be cropped), false = "deselected" (will be ignored when cropping)
 
-                // increment column until the remaining horizontal space can no longer fit a whole image preview, then reset it and increment the row
-                if ((column + 2) * (previewWidth + margin) < Width - 12) // 12: 6 pixels for margin on each side for the images dragPanel
-                    column++;
-                else
-                {
-                    column = 0;
-                    row++;
-                }
+                    container.Children.Add(dragPanel);
+                    grdImages.Children.Add(container);
+
+                    // increment column until the remaining horizontal space can no longer fit a whole image preview, then reset it and increment the row
+                    if ((column + 2) * (previewWidth + margin) < Width - 12) // 12: 6 pixels for margin on each side for the images dragPanel
+                        column++;
+                    else
+                    {
+                        column = 0;
+                        row++;
+                    }
+                });
             }
-        }
+        });
+    }
+
+    /// <summary>
+    /// Loads an image and returns a scaled down version of it, as Bitmap
+    /// </summary>
+    /// <param name="image">The image to load</param>
+    /// <param name="targetWidth">The width of the scaled down bitmap</param>
+    /// <param name="targetHeight">The height of the scaled down bitmap</param>
+    /// <returns>A scaled down bitmap of the original image</returns>
+    public static async Task<Bitmap> LoadResizedImageAsync(SixLabors.ImageSharp.Image image, int targetWidth, int targetHeight)
+    {
+        // Calculate scale ratio to maintain aspect ratio
+        var scale = Math.Min(targetWidth / (float)image.Width, targetHeight / (float)image.Height);
+
+        image.Mutate(x => x.Resize((int)(image.Width * scale), (int)(image.Height * scale)));
+        var memoryStream = new MemoryStream();
+        await image.SaveAsBmpAsync(memoryStream);
+        memoryStream.Seek(0, SeekOrigin.Begin);
+        return new Bitmap(memoryStream);
     }
 
     /// <summary>
