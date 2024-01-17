@@ -1,4 +1,5 @@
 src/.vs/*
+src/.vscode/*
 src/.idea/*
 src/.editorconfig
 src/DatasetCrop/obj/*
@@ -6,3 +7,4 @@ bin/*
 .git/*
 datasetcrop.key
 datasetcrop.key.pub
+.fake
