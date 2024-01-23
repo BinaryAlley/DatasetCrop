@@ -181,9 +181,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             });
 
             var loadedImages = await Task.WhenAll(loadTasks);
-            foreach (var loadedImage in loadedImages)
+            await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                await Dispatcher.UIThread.InvokeAsync(async () =>
+                foreach (var loadedImage in loadedImages)
                 {
                     // for each image file, create a grid that contains an image and a drag panel, and add it to the previews list
                     Grid container = new();
@@ -248,8 +248,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                         column = 0;
                         row++;
                     }
-                });
-            }
+                }
+            });
         });
     }
 
@@ -314,40 +314,44 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 {
                     var originalImagePath = imageControl.Tag?.ToString()!;
                     var originalExtension = Path.GetExtension(originalImagePath);
-                    var croppedImagePath = Path.Combine(Path.GetDirectoryName(OutputPath)!, Path.GetFileNameWithoutExtension(originalImagePath) + "-cropped" + originalExtension);
-                    // original image dimensions
-                    var originalWidth = imageControl.Source.Size.Width;
-                    var originalHeight = imageControl.Source.Size.Height;
-                    // calculate scaling factor
-                    var scaleX = originalWidth / imageControl.Bounds.Width;
-                    var scaleY = originalHeight / imageControl.Bounds.Height;
-                    // translate crop area to original scale
-                    double originalCropX, originalCropY, originalCropWidth, originalCropHeight;
-                    if (usesOriginalScaleSizes)
+                    var croppedImagePath = Path.Combine((Path.HasExtension(OutputPath) ? Path.GetDirectoryName(OutputPath) : OutputPath)!, Path.GetFileNameWithoutExtension(originalImagePath) + "-cropped" + originalExtension);
+                    using (var tempImage = await SixLabors.ImageSharp.Image.LoadAsync(originalImagePath))
                     {
-                        originalCropX = dragPanel.Margin.Left * scaleX;
-                        originalCropY = dragPanel.Margin.Top * scaleY;
-                        originalCropWidth = cropWidth;
-                        originalCropHeight = cropHeight;
+                        // original image dimensions
+                        var originalWidth = tempImage.Width;
+                        var originalHeight = tempImage.Height;
+
+                        // calculate scaling factor
+                        var scaleX = originalWidth / imageControl.Bounds.Width;
+                        var scaleY = originalHeight / imageControl.Bounds.Height;
+                        // translate crop area to original scale
+                        double originalCropX, originalCropY, originalCropWidth, originalCropHeight;
+                        if (usesOriginalScaleSizes)
+                        {
+                            originalCropX = dragPanel.Margin.Left * scaleX;
+                            originalCropY = dragPanel.Margin.Top * scaleY;
+                            originalCropWidth = cropWidth;
+                            originalCropHeight = cropHeight;
+                        }
+                        else
+                        {
+                            originalCropX = dragPanel.Margin.Left * scaleX;
+                            originalCropY = dragPanel.Margin.Top * scaleY;
+                            originalCropWidth = dragPanel.Width * scaleX;
+                            originalCropHeight = dragPanel.Height * scaleY;
+                        }
+                        byte[] imageBytes = await File.ReadAllBytesAsync(originalImagePath);
+                        IImageFormat imageFormat = originalExtension.ToLower() switch
+                        {
+                            ".png" => PngFormat.Instance,
+                            ".bmp" => BmpFormat.Instance,
+                            _ => JpegFormat.Instance
+                        };
+                        // perform the crop operation
+                        byte[] croppedImageBytes = await CropImageAsync(tempImage, originalCropX, originalCropY, originalCropWidth, originalCropHeight, imageFormat);
+                        // save the cropped image back to disk
+                        await File.WriteAllBytesAsync(croppedImagePath, croppedImageBytes);
                     }
-                    else
-                    {
-                        originalCropX = dragPanel.Margin.Left * scaleX;
-                        originalCropY = dragPanel.Margin.Top * scaleY;
-                        originalCropWidth = dragPanel.Width * scaleX;
-                        originalCropHeight = dragPanel.Height * scaleY;
-                    }
-                    byte[] imageBytes = await File.ReadAllBytesAsync(originalImagePath);
-                    IImageFormat imageFormat = originalExtension.ToLower() switch
-                    {
-                        ".png" => PngFormat.Instance,
-                        ".bmp" => BmpFormat.Instance,
-                        _ => JpegFormat.Instance
-                    };
-                    // perform the crop operation
-                    byte[] croppedImageBytes = await CropImageAsync(imageBytes, originalCropX, originalCropY, originalCropWidth, originalCropHeight, imageFormat);
-                    // save the cropped image back to disk
-                    await File.WriteAllBytesAsync(croppedImagePath, croppedImageBytes);
                 }
             }
             await MessageBoxManager.GetMessageBoxStandardWindow("Success!", "Images cropped!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Success).ShowDialog(this);
@@ -361,18 +365,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     /// <summary>
     /// Crops an image to a specified area
     /// </summary>
-    /// <param name="imageBytes">The byte array of the source image</param>
+    /// <param name="image">The source image</param>
     /// <param name="cropX">The X coordinate of the top-left corner of the crop area</param>
     /// <param name="cropY">The Y coordinate of the top-left corner of the crop area</param>
     /// <param name="cropWidth">The width of the crop area</param>
     /// <param name="cropHeight">The height of the crop area</param>
     /// <param name="imageFormat">The format of the image to save</param>
     /// <returns>The byte array of the cropped image</returns>
-    private static async Task<byte[]> CropImageAsync(byte[] imageBytes, double cropX, double cropY, double cropWidth, double cropHeight, IImageFormat imageFormat)
+    private static async Task<byte[]> CropImageAsync(SixLabors.ImageSharp.Image image, double cropX, double cropY, double cropWidth, double cropHeight, IImageFormat imageFormat)
     {
-        using var inputMemoryStream = new MemoryStream(imageBytes);
+        //using var inputMemoryStream = new MemoryStream(imageBytes);
         using var outputMemoryStream = new MemoryStream();
-        using SixLabors.ImageSharp.Image image = await SixLabors.ImageSharp.Image.LoadAsync(inputMemoryStream);
         // define the crop area
         var cropRectangle = new Rectangle((int)cropX, (int)cropY, (int)cropWidth, (int)cropHeight);
         // crop the image
@@ -611,4 +614,4 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             isControlPressed = true;
     }
     #endregion
-}
+} 
