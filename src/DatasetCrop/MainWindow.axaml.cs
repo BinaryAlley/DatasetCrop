@@ -36,7 +36,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 {
     #region ================================================================== FIELD MEMBERS ================================================================================
     private bool isDragStarted = false;
-    private bool isControlPressed = false;
     public new event PropertyChangedEventHandler? PropertyChanged;
     #endregion
 
@@ -102,6 +101,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         get { return outputPath; }
         set { outputPath = value; Notify(); }
+    }
+    
+    private bool isSelectionMode;
+    public bool IsSelectionMode
+    {
+        get { return isSelectionMode; }
+        set { isSelectionMode = value; Notify(); }
     }
 
     private bool usesOriginalScaleSizes = true;
@@ -558,7 +564,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     /// </summary>
     private void DragPanel_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (isControlPressed)
+        if (IsSelectionMode)
         {
             if (sender is Panel dragPanel) // when Control is pressed, toggle the "is selected" state
             {
@@ -595,23 +601,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             // update the position of the dragPanel
             panel.Margin = new Thickness(newX, newY, 0, 0);
         }
-    }
-
-    /// <summary>
-    /// Handles Window's KeyUp event
-    /// </summary>
-    private void Window_KeyUp(object? sender, KeyEventArgs e)
-    {
-        isControlPressed = false;
-    }
-
-    /// <summary>
-    /// Handles Window's KeyDown event
-    /// </summary>
-    private void Window_KeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.KeyModifiers == KeyModifiers.Control)
-            isControlPressed = true;
     }
     #endregion
 } 

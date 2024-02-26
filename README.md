@@ -52,7 +52,7 @@ Dataset Crop was built using [Avalonia UI](https://avaloniaui.net/), so it is cr
    - **Preview width**, **Preview height**: the width and height of the preview panels for images.
 4. Press the **Refresh** button. At this moment, the previews of the images in the specified input directory will be displayed (or you will get a validation error, if some parameter is wrong).
 5. Use the preview pane to adjust crop areas on each image. They can be positioned with the mouse.
-6. Holding down the Control key and clicking on the crop area of images will toggle their "selected" state. This allows you to exclude images from the crop process. 
+6. Checking the **Selection mode** option and clicking on the crop area of images will toggle their "selected" state. This allows you to exclude images from the crop process. 
    Excluded images will turn their crop area preview's background to a semi-transparent red.
 7. For the **Output Path** field, browse and select a directory where the cropped images will be saved, or manually paste the path in the text box.
 8. Execute the batch crop process by clicking the **Crop** button.
