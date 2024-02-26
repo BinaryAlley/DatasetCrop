@@ -187,7 +187,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             });
 
             var loadedImages = await Task.WhenAll(loadTasks);
-            await Dispatcher.UIThread.InvokeAsync(async () =>
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 foreach (var loadedImage in loadedImages)
                 {
@@ -199,15 +199,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                     container.HorizontalAlignment = HorizontalAlignment.Left;
                     container.VerticalAlignment = VerticalAlignment.Top;
                     container.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(0, 0, 0), 0.1);
-                    // for each image, ensure the drag panel is not in any way bigger than the visible area of the scaled down image preview
-                    if (!ValidateCropPanelSize(loadedImage.OriginalSize.Width, loadedImage.OriginalSize.Height, cropWidth, cropHeight, previewWidth, previewHeight))
-                    {
-                        await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Specified crop size exceeds the bounds of the scaled image!" + Environment.NewLine + loadedImage.FilePath, ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
-                        ClearImagePreviews();
-                        return;
-                    }
                     Avalonia.Controls.Image image = new();
-                    //image.Source = bitmap;
                     image.Width = previewWidth;
                     image.Height = previewHeight;
                     image.Source = loadedImage.Image;
@@ -234,14 +226,24 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                         dragPanel.Height = cropHeight;
                         dragPanel.Margin = new Thickness(cropX, cropY, 0, 0);
                     }
+                    // for each image, ensure the drag panel is not in any way bigger than the visible area of the scaled down image preview
+                    if (!ValidateCropPanelSize(loadedImage.OriginalSize.Width, loadedImage.OriginalSize.Height, cropWidth, cropHeight, previewWidth, previewHeight))
+                    {
+                        dragPanel.Tag = false; // do not select the image, if its crop parameters are not ok 
+                        dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 0, 0), 0.3);
+                        dragPanel.IsEnabled = false; // don't allow dragging, when the image is not valid for cropping
+                    }
+                    else
+                    {
+                        dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 255, 255), 0.3);
+                        dragPanel.Tag = true; // true = "selected" (will be cropped), false = "deselected" (will be ignored when cropping)
+                    }
                     dragPanel.HorizontalAlignment = HorizontalAlignment.Left;
                     dragPanel.VerticalAlignment = VerticalAlignment.Top;
-                    dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 255, 255), 0.3);
                     dragPanel.Cursor = new Cursor(StandardCursorType.SizeAll);
                     dragPanel.PointerMoved += DragPanel_PointerMoved; // subscribe the event handlers used for dragging
                     dragPanel.PointerPressed += DragPanel_PointerPressed;
                     dragPanel.PointerReleased += DragPanel_PointerReleased;
-                    dragPanel.Tag = true; // true = "selected" (will be cropped), false = "deselected" (will be ignored when cropping)
 
                     container.Children.Add(dragPanel);
                     grdImages.Children.Add(container);
@@ -391,6 +393,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return outputMemoryStream.ToArray();
     }
 
+    #region Validation
     /// <summary>
     /// Validates the required information for setting the input path
     /// </summary>
@@ -647,6 +650,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         else
             return true;
     }
+    #endregion
 
     /// <summary>
     /// Notifies subscribers about a property's value being changed
@@ -674,14 +678,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         if (IsSelectionMode)
         {
-            if (sender is Panel dragPanel) // when Control is pressed, toggle the "is selected" state
+            if (sender is Panel dragPanel) 
             {
                 bool isSelected = (bool)dragPanel.Tag!;
                 dragPanel.Tag = !isSelected;
                 dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, (byte)(!isSelected ? 255 : 0), (byte)(!isSelected ? 255 : 0)), 0.3); 
             }
         }
-        else // Control is not pressed, just enable dragging
+        else // not in selection mode, just enable dragging
             isDragStarted = true;
     }
 

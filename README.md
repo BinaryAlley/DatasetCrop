@@ -54,9 +54,10 @@ Dataset Crop was built using [Avalonia UI](https://avaloniaui.net/), so it is cr
 5. Use the preview pane to adjust crop areas on each image. They can be positioned with the mouse.
 6. Checking the **Selection mode** option and clicking on the crop area of images will toggle their "selected" state. This allows you to exclude images from the crop process. 
    Excluded images will turn their crop area preview's background to a semi-transparent red.
-7. For the **Output Path** field, browse and select a directory where the cropped images will be saved, or manually paste the path in the text box.
-8. Execute the batch crop process by clicking the **Crop** button.
-9. The cropped images should be ready to be used in the training process. The input images are not modified in any way.
+7. When defining invalid parameters (for example, when setting crop width to 100 pixels, but the image width is just 84 pixels), the preview panes will be disabled and their background set to a semi-transparent red. These images cannot be selected, and they will not be cropped.
+8. For the **Output Path** field, browse and select a directory where the cropped images will be saved, or manually paste the path in the text box.
+9. Execute the batch crop process by clicking the **Crop** button.
+10. The cropped images should be ready to be used in the training process. The input images are not modified in any way.
 
 ## Contributing
 
