@@ -461,68 +461,176 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     /// <returns><see langword="true"/> if the required information is met, <see langword="false"/> otherwise</returns>
     private async Task<bool> ValidateCropParameters()
     {
-        if (cropHeight < 1)
+        if (!ValidateCropHeight())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop height must be greater than zero!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (cropWidth < 1)
+        else if (!ValidateCropWidth())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop width must be greater than zero!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (cropX < 0)
+        else if (!ValidateCropX())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop X must be greater than or equal to zero!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (cropY < 0)
+        else if (!ValidateCropY())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop Y must be greater than or equal to zero!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (!usesOriginalScaleSizes && cropX + cropWidth > previewWidth)
+        else if (!ValidateCropRectangleWidthFit())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop X plus Crop Width cannot be greater than preview width!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (!usesOriginalScaleSizes && cropY + cropHeight > previewHeight)
+        else if (!ValidateCropRectangleHeightFit())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop Y plus Crop Height cannot be greater than preview height!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (previewHeight < 1)
+        else if (!ValidatePreviewHeight())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Preview height must be greater than zero!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (previewWidth < 1)
+        else if (!ValidatePreviewWidth())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Preview width must be greater than zero!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (!usesOriginalScaleSizes && cropWidth > grdImages.Width)
+        else if (!ValidateCropAndDragRectanglesWidthFit())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop width cannot be greater than the dragPanel width!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (!usesOriginalScaleSizes && cropHeight > grdImages.Height)
+        else if (!ValidateCropAndDragRectanglesHeightFit())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop height cannot be greater than the dragPanel height!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (!usesOriginalScaleSizes && cropWidth > previewWidth)
+        else if (!ValidateCropAndPreviewRectanglesWidthFit())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop width cannot be greater than preview width!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
-        else if (!usesOriginalScaleSizes && cropHeight > previewHeight)
+        else if (!ValidateCropAndPreviewRectanglesHeightFit())
         {
             await MessageBoxManager.GetMessageBoxStandardWindow("Error!", "Crop height cannot be greater than preview height!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Error).ShowDialog(this);
             return false;
         }
         else
             return true;
+    }
+
+    /// <summary>
+    /// Validates that the crop X coordinate is positive
+    /// </summary>
+    /// <returns><see langword="true"/> if <see cref="cropX"/> is positive, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropX()
+    {
+        return cropX >= 0;
+    }
+
+    /// <summary>
+    /// Validates that the crop Y coordinate is positive
+    /// </summary>
+    /// <returns><see langword="true"/> if <see cref="cropY"/> is positive, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropY()
+    {
+        return cropY >= 0;
+    }
+
+    /// <summary>
+    /// Validates that the crop width is positive
+    /// </summary>
+    /// <returns><see langword="true"/> if <see cref="cropWidth"/> is positive, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropWidth()
+    {
+        return cropWidth > 0;
+    }
+
+    /// <summary>
+    /// Validates that the crop height is positive
+    /// </summary>
+    /// <returns><see langword="true"/> if <see cref="cropHeight"/> is positive, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropHeight()
+    {
+        return cropHeight > 0;
+    }
+
+    /// <summary>
+    /// Validates that the preview width is positive
+    /// </summary>
+    /// <returns><see langword="true"/> if <see cref="previewWidth"/> is positive, <see langword="false"/> otherwise</returns>
+    private bool ValidatePreviewWidth()
+    {
+        return previewWidth > 0;
+    }
+
+    /// <summary>
+    /// Validates that the preview height is positive
+    /// </summary>
+    /// <returns><see langword="true"/> if <see cref="previewHeight"/> is positive, <see langword="false"/> otherwise</returns>
+    private bool ValidatePreviewHeight()
+    {
+        return previewHeight > 0;
+    }
+
+    /// <summary>
+    /// Validates that <see cref="cropWidth"/> plus the <see cref="cropX"/> coordinate are within the image bounds
+    /// </summary>
+    /// <returns><see langword="true"/> if the <see cref="cropWidth"/> is within image bounds, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropRectangleWidthFit()
+    {
+        return usesOriginalScaleSizes || cropX + cropWidth <= previewWidth;
+    }
+
+    /// <summary>
+    /// Validates that <see cref="cropHeight"/> plus the <see cref="cropY"/> coordinate are within the image bounds
+    /// </summary>
+    /// <returns><see langword="true"/> if the <see cref="cropHeight"/> is within image bounds, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropRectangleHeightFit()
+    {
+        return usesOriginalScaleSizes || cropY + cropHeight <= previewHeight;
+    }
+
+    /// <summary>
+    /// Validates that <see cref="cropWidth"/> is smaller or equal than the drag panel's width
+    /// </summary>
+    /// <returns><see langword="true"/> if the crop rectangle width is within drag panel's width, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropAndDragRectanglesWidthFit()
+    {
+        return usesOriginalScaleSizes || cropWidth <= grdImages.Width;
+    }
+
+    /// <summary>
+    /// Validates that <see cref="cropHeight"/> is smaller or equal than the drag panel's height
+    /// </summary>
+    /// <returns><see langword="true"/> if the crop rectangle height is within drag panel's height, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropAndDragRectanglesHeightFit()
+    {
+        return usesOriginalScaleSizes || cropHeight <= grdImages.Height;
+    }
+
+    /// <summary>
+    /// Validates that <see cref="cropWidth"/> is smaller or equal than the preview panel's width
+    /// </summary>
+    /// <returns><see langword="true"/> if the crop rectangle width is within preview panel's width, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropAndPreviewRectanglesWidthFit()
+    {
+        return usesOriginalScaleSizes || cropWidth <= previewWidth;
+    }
+
+    /// <summary>
+    /// Validates that <see cref="cropHeight"/> is smaller or equal than the preview panel's height
+    /// </summary>
+    /// <returns><see langword="true"/> if the crop rectangle height is within preview panel's height, <see langword="false"/> otherwise</returns>
+    private bool ValidateCropAndPreviewRectanglesHeightFit()
+    {
+        return usesOriginalScaleSizes || cropHeight <= previewHeight;
     }
 
     /// <summary>
