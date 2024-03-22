@@ -5,39 +5,50 @@
         mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="450" MinWidth="1325" MinHeight="500"
         x:Class="DatasetCrop.MainWindow"
         Title="Dataset Crop" WindowStartupLocation="CenterScreen" WindowState="Maximized" Icon="/Assets/crop.png">
-  <Grid>
-    <Label Content="Input path:" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="6,15,0,0" Width="100" Height="23"/>
-    <TextBox Text="{Binding InputPath}" Margin="90,10,175,0" Height="23" VerticalAlignment="Top" HorizontalContentAlignment="Left" FontSize="14"/>
-    <Button Content="Browse..." Command="{Binding BrowseInputAsync_Command}" FontFamily="Arial" Height="32" Width="80" Padding="0" FontSize="14" Margin="0,10,90,0" HorizontalAlignment="Right" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-    <Button Content="Refresh" Command="{Binding RefreshInputAsync_Command}" FontFamily="Arial" Height="32" Width="80" Padding="0" FontSize="14" Margin="0,10,6,0" HorizontalAlignment="Right" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+  <DockPanel Background="{DynamicResource WindowBackground}">        
+    <Menu DockPanel.Dock="Top" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}">
+      <MenuItem Header="_File" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}">
+          <MenuItem Header="Theme" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}">
+            <MenuItem Header="Light" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}" Click="SetLightTheme_Click"/>
+            <MenuItem Header="Dark" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}" Click="SetDarkTheme_Click"/>
+          </MenuItem>
+          <MenuItem Header="Quit" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}" Click="CloseApplication_Click"/>
+      </MenuItem>
+    </Menu>
+    <Grid>
+      <Label Content="Input path:" Foreground="{DynamicResource TextForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="6,15,0,0" Width="100" Height="23"/>
+      <TextBox Text="{Binding InputPath}" Margin="90,10,175,0" Height="23" VerticalAlignment="Top" HorizontalContentAlignment="Left" FontSize="14"/>
+      <Button Content="Browse..." Command="{Binding BrowseInputAsync_Command}" Foreground="{DynamicResource TextForeground}" FontFamily="Arial" Height="32" Width="80" Padding="0" FontSize="14" Margin="0,10,90,0" HorizontalAlignment="Right" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+      <Button Content="Refresh" Command="{Binding RefreshInputAsync_Command}" Foreground="{DynamicResource TextForeground}" FontFamily="Arial" Height="32" Width="80" Padding="0" FontSize="14" Margin="0,10,6,0" HorizontalAlignment="Right" VerticalAlignment="Top" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
 
-    <Label Content="Crop width:" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="6,55,0,0" Width="100" Height="23"/>
-    <TextBox Text="{Binding CropWidth}" Margin="90,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
-    <Label Content="Crop height:" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="193,55,0,0" Width="100" Height="23"/>
-    <TextBox Text="{Binding CropHeight}" Margin="285,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
+      <Label Content="Crop width:" Foreground="{DynamicResource TextForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="6,55,0,0" Width="100" Height="23"/>
+      <TextBox Text="{Binding CropWidth}" Margin="90,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
+      <Label Content="Crop height:" Foreground="{DynamicResource TextForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="193,55,0,0" Width="100" Height="23"/>
+      <TextBox Text="{Binding CropHeight}" Margin="285,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
+      
+      <Label Content="Crop X:" Foreground="{DynamicResource TextForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="396,55,0,0" Width="100" Height="23"/>
+      <TextBox Text="{Binding CropX}" Margin="453,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
+      <Label Content="Crop Y:" Foreground="{DynamicResource TextForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="556,55,0,0" Width="105" Height="23"/>
+      <TextBox Text="{Binding CropY}" Margin="613,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
     
-    <Label Content="Crop X:" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="396,55,0,0" Width="100" Height="23"/>
-    <TextBox Text="{Binding CropX}" Margin="453,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
-    <Label Content="Crop Y:" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="556,55,0,0" Width="105" Height="23"/>
-    <TextBox Text="{Binding CropY}" Margin="613,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
-   
-    <Label Content="Preview width:" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="716,55,0,0" Width="110" Height="23"/>
-    <TextBox Text="{Binding PreviewWidth}" Margin="820,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
-    <Label Content="Preview height:" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="923,55,0,0" Width="110" Height="23"/>
-    <TextBox Text="{Binding PreviewHeight}" Margin="1033,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
+      <Label Content="Preview width:" Foreground="{DynamicResource TextForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="716,55,0,0" Width="110" Height="23"/>
+      <TextBox Text="{Binding PreviewWidth}" Margin="820,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
+      <Label Content="Preview height:" Foreground="{DynamicResource TextForeground}" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" Margin="923,55,0,0" Width="110" Height="23"/>
+      <TextBox Text="{Binding PreviewHeight}" Margin="1033,50,0,0" Width="100" Height="23" VerticalAlignment="Top" HorizontalAlignment="Left" FontSize="14"/>
+      
+      <CheckBox Content=" Use original scale sizes" IsChecked="{Binding UsesOriginalScaleSizes}" Foreground="{DynamicResource TextForeground}" FontFamily="Arial" Height="32" Width="180" Padding="0" FontSize="14" Margin="1140,38,6,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
     
-    <CheckBox Content=" Use original scale sizes" IsChecked="{Binding UsesOriginalScaleSizes}" FontFamily="Arial" Height="32" Width="180" Padding="0" FontSize="14" Margin="1140,38,6,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
-  
-    <CheckBox Content=" Selection mode" IsChecked="{Binding IsSelectionMode}" FontFamily="Arial" Height="32" Width="180" Padding="0" FontSize="14" Margin="1140,62,6,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
-  
-    <ScrollViewer Background="LightBlue" Margin="6,90,6,50" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-      <Grid x:Name="grdImages">
-        
-      </Grid>
-    </ScrollViewer>
-    <Label Content="Output path:" HorizontalAlignment="Left" VerticalAlignment="Bottom" HorizontalContentAlignment="Left" Margin="6,15,0,15" Width="100" Height="23"/>
-    <TextBox Text="{Binding OutputPath}" Margin="100,10,175,10" Height="23" VerticalAlignment="Bottom" HorizontalContentAlignment="Left" FontSize="14"/>
-    <Button Content="Browse..." Command="{Binding BrowseOutputAsync_Command}" FontFamily="Arial" Height="32" Width="80" Padding="0" FontSize="14" Margin="0,10,90,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-    <Button Content="Crop" Command="{Binding CropImagesAsync_Command}" FontFamily="Arial" Height="32" Width="80" Padding="0" FontSize="14" Margin="0,10,6,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-  </Grid>
+      <CheckBox Content=" Selection mode" IsChecked="{Binding IsSelectionMode}" Foreground="{DynamicResource TextForeground}" FontFamily="Arial" Height="32" Width="180" Padding="0" FontSize="14" Margin="1140,62,6,0" HorizontalAlignment="Left" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"/>
+    
+      <ScrollViewer Background="LightBlue" Margin="6,90,6,50" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <Grid x:Name="grdImages" Background="{DynamicResource ImagesPanelBackground}">
+          
+        </Grid>
+      </ScrollViewer>
+      <Label Content="Output path:" Foreground="{DynamicResource TextForeground}" HorizontalAlignment="Left" VerticalAlignment="Bottom" HorizontalContentAlignment="Left" Margin="6,15,0,15" Width="100" Height="23"/>
+      <TextBox Text="{Binding OutputPath}" Margin="100,10,175,10" Height="23" VerticalAlignment="Bottom" HorizontalContentAlignment="Left" FontSize="14"/>
+      <Button Content="Browse..." Command="{Binding BrowseOutputAsync_Command}" Foreground="{DynamicResource TextForeground}" FontFamily="Arial" Height="32" Width="80" Padding="0" FontSize="14" Margin="0,10,90,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+      <Button Content="Crop" Command="{Binding CropImagesAsync_Command}" Foreground="{DynamicResource TextForeground}" FontFamily="Arial" Height="32" Width="80" Padding="0" FontSize="14" Margin="0,10,6,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+    </Grid>
+  </DockPanel>
 </Window>

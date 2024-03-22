@@ -12,6 +12,7 @@ Dataset Crop simplifies the crucial step of preparing image datasets for machine
 - **Aspect Ratio Preservation**: Automatically adjust images to maintain the aspect ratio during the crop.
 - **Selection Toggle**: easily select or deselect which images to crop or not.
 - **Original Encoding Preservation**: The cropped images are saved using the same image format as the input images.
+- **Theme**: Light and Dark theme support.
 
 ## Running the Application
 

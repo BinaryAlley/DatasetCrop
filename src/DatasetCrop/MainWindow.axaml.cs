@@ -1,7 +1,9 @@
 #region ========================================================================= USING =====================================================================================
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -37,6 +39,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     #region ================================================================== FIELD MEMBERS ================================================================================
     private bool isDragStarted = false;
     public new event PropertyChangedEventHandler? PropertyChanged;
+    public static event Action<int>? ThemeChanged;
     #endregion
 
     #region ================================================================= BINDING COMMANDS ==============================================================================
@@ -130,6 +133,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         BrowseInputAsync_Command = new AsyncCommand(BrowseInputAsync);
         BrowseOutputAsync_Command = new AsyncCommand(BrowseOutputAsync);
         DataContext = this;
+        App.StyleManager?.SwitchThemeByIndex(1);
     }
     #endregion
 
@@ -663,6 +667,33 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     #endregion
 
     #region ================================================================== EVENT HANDLERS ===============================================================================
+    /// <summary>
+    /// Event handler for the program quit menu item
+    /// </summary>
+    private async void CloseApplication_Click(object sender, RoutedEventArgs e)
+    {
+        if (await MessageBoxManager.GetMessageBoxStandardWindow("Confirmation", "Are you sure you want to close this program?", 
+            ButtonEnum.YesNo, MessageBox.Avalonia.Enums.Icon.Question).ShowDialog(this) == ButtonResult.Yes)
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopApp)
+                desktopApp.Shutdown();
+    }
+    
+    /// <summary>
+    /// Event handler for the light theme menu item
+    /// </summary>
+    private void SetLightTheme_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeChanged?.Invoke(1);
+    }
+    
+    /// <summary>
+    /// Event handler for the dark theme menu item
+    /// </summary>
+    private void SetDarkTheme_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeChanged?.Invoke(0);
+    }
+    
     /// <summary>
     /// Handles Drag Panel's PointerReleased event
     /// </summary>

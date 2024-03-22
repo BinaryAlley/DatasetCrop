@@ -3,5 +3,7 @@
              x:Class="DatasetCrop.App">
     <Application.Styles>
         <FluentTheme Mode="Light"/>
+
+        <StyleInclude Source="/Common/Styles/Dark.xaml"/>
     </Application.Styles>
 </Application>
