@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1100" d:DesignHeight="450" MinWidth="1325" MinHeight="500"
         x:Class="DatasetCrop.MainWindow"
-        Title="Dataset Crop" WindowStartupLocation="CenterScreen" WindowState="Maximized" Icon="/Assets/crop.png">
+        Title="Dataset Crop" WindowStartupLocation="CenterScreen" WindowState="Maximized" Icon="/Assets/crop.png" KeyDown="Window_KeyDown">
   <DockPanel Background="{DynamicResource WindowBackground}">        
     <Menu DockPanel.Dock="Top" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}">
       <MenuItem Header="_File" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}">
@@ -13,6 +13,9 @@
             <MenuItem Header="Dark" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}" Click="SetDarkTheme_Click"/>
           </MenuItem>
           <MenuItem Header="Quit" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}" Click="CloseApplication_Click"/>
+      </MenuItem>
+      <MenuItem Header="_Tools" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}">
+        <MenuItem Header="Key Bindings" Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextForeground}" Click="ShowKeyBingings_Click"/>
       </MenuItem>
     </Menu>
     <Grid>

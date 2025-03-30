@@ -168,6 +168,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         if (!await ValidateCropParameters())
             return;
+        Title = "Dataset Crop - Working...";
         // clear previous image previews
         ClearImagePreviews();
         int column = 0;
@@ -233,6 +234,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                     // for each image, ensure the drag panel is not in any way bigger than the visible area of the scaled down image preview
                     if (!ValidateCropPanelSize(loadedImage.OriginalSize.Width, loadedImage.OriginalSize.Height, cropWidth, cropHeight, previewWidth, previewHeight))
                     {
+                        dragPanel.Width = previewWidth;
+                        dragPanel.Height = previewHeight;
                         dragPanel.Tag = false; // do not select the image, if its crop parameters are not ok 
                         dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 0, 0), 0.3);
                         dragPanel.IsEnabled = false; // don't allow dragging, when the image is not valid for cropping
@@ -263,6 +266,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 }
             });
         });
+        Title = "Dataset Crop";
     }
 
     /// <summary>
@@ -316,6 +320,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         if (!await ValidateImageFiles())
             return;
+        Title = "Dataset Crop - Working...";
         try
         {
             foreach (var container in grdImages.Children.OfType<Grid>())
@@ -352,7 +357,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                             originalCropWidth = dragPanel.Width * scaleX;
                             originalCropHeight = dragPanel.Height * scaleY;
                         }
-                        byte[] imageBytes = await File.ReadAllBytesAsync(originalImagePath);
                         IImageFormat imageFormat = originalExtension.ToLower() switch
                         {
                             ".png" => PngFormat.Instance,
@@ -366,6 +370,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                     }
                 }
             }
+            Title = "Dataset Crop";
             await MessageBoxManager.GetMessageBoxStandardWindow("Success!", "Images cropped!", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Success).ShowDialog(this);
         }
         catch (Exception ex)
@@ -744,6 +749,49 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             // update the position of the dragPanel
             panel.Margin = new Thickness(newX, newY, 0, 0);
         }
+    }
+    
+    /// <summary>
+    /// Handles the window key down events.
+    /// </summary>
+    private void Window_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (IsSelectionMode)
+        {
+            foreach (var container in grdImages.Children.OfType<Grid>())
+            {
+                var dragPanel = container.Children.OfType<Panel>().FirstOrDefault();
+                if (!dragPanel.IsEnabled) // skip images where the drag panel is bigger than the images - they are not valid for selecting/cropping
+                    continue;
+                if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.A) // ctrl+a selects all
+                {
+                    dragPanel.Tag = true;
+                    dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 255, 255), 0.3); 
+                }
+                else if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.N) // ctrl+n selects none
+                {
+                    dragPanel.Tag = false;
+                    dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 0, 0), 0.3); 
+                }
+                else if (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.I) // ctrl+i inverts selection
+                {
+                    bool isSelected = (bool)dragPanel.Tag!;
+                    dragPanel.Tag = !isSelected;
+                    dragPanel.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, (byte)(!isSelected ? 255 : 0), (byte)(!isSelected ? 255 : 0)), 0.3); 
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Handles Show Key Bindings click event. 
+    /// </summary>
+    private async void ShowKeyBingings_Click(object? sender, RoutedEventArgs e)
+    {
+        await MessageBoxManager.GetMessageBoxStandardWindow("Key Bindings", 
+            "Ctrl + A: in Selection Mode, selects all images\n" +
+            "Ctrl + N: in Selection Mode, deselects all images\n" +
+            "Ctrl + I: in Selection Mode, inverts images selection\n", ButtonEnum.Ok, MessageBox.Avalonia.Enums.Icon.Info).ShowDialog(this);
     }
     #endregion
 } 
