@@ -20,13 +20,13 @@ Dataset Crop was built using [Avalonia UI](https://avaloniaui.net/), so it is cr
 
 ### Linux, macOS
 
-1. Make sure you have the [.NET 7.0](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) runtime installed. The process can differ based on your particular distro.
+1. Make sure you have the [.NET 9.0](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) runtime installed. The process can differ based on your particular distro.
 2. Open a terminal and navigate to the directory where the application is located.
 3. Run the application using this command:
    ```bash
    dotnet DatasetCrop.dll
    ```
-4. Depending on your Linux distribution, you might need to install additional dependencies. For instance, if you encounter issues related to `libSkiaSharp`, you might need to install specific libraries like `libice6`, `libsm6`, and `libfontconfig1`. These dependencies are required for `SkiaSharp`, which is used by Avalonia for rendering:
+4. Depending on your Linux distribution, you might need to install additional dependencies. For instance, if you encounter issues related to `libSkiaSharp`, you might need to install specific libraries like `libice6`, `libsm6`, and `libfontconfig1`. These dependencies are required for `SkiaSharp`, which is used by Avalonia for rendering. Example for Debian/Ubuntu:
    ```bash
     sudo apt install libice6
     sudo apt install libsm6
